@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TooGoodToGo Terminal</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span> <span id="theme-text">LIGHT MODE</span>
+    </button>
+
+    <div class="terminal-container">
+        <div class="header">
+            <img src="/static/img/header-light.png" alt="Monitor Header Light" class="header-image header-image-light" />
+            <img src="/static/img/header-dark.png" alt="Monitor Header Dark" class="header-image header-image-dark" />
+        </div>
+        
+        <div class="line">
+            <span class="prompt">tgtg@monitor:~$</span> 
+            <span class="command">./initialize_monitoring</span>
+            <span class="comment"># Access TooGoodToGo monitoring system</span>
+        </div>
+        <div class="line">
+            <span class="success">✓</span> <span class="highlight">TooGoodToGo Monitor</span> initialized successfully
+        </div>
+        <div class="line">
+            <span class="comment"># Email alerts when NEW surprise bags become available</span>
+        </div>
+        <div class="line">
+            <span class="comment"># Instant notifications • Auto-sync favorites</span>
+        </div>
+        
+        <div class="step">
+            <h3>REGISTER FOR MONITORING</h3>
+            <div class="line">
+                <span class="prompt">tgtg@monitor:~$</span> 
+                <span class="command">register</span> 
+                <span class="comment">--email=</span><span class="warning">[your-tgtg-email]</span>
+            </div>
+            
+            <form id="signupForm">
+                <input type="email" 
+                       id="tgtg_email" 
+                       name="tgtg_email" 
+                       placeholder="your-tgtg-account@example.com"
+                       required>
+                <button type="submit">EXECUTE REGISTRATION</button>
+            </form>
+            
+            <div class="output" style="display: none;" id="signupOutput">
+                <div class="line">
+                    <span class="warning">⚠</span> 
+                    <span class="comment">VERIFICATION_REQUIRED: Check TooGoodToGo email (PC only)</span>
+                </div>
+                <div class="line">
+                    <span class="comment">└─ Click verification link to authenticate account</span>
+                </div>
+            </div>
+            
+            <div id="signupMessage"></div>
+        </div>
+        
+        <div class="step">
+            <h3>SYSTEM STATUS</h3>
+            <div class="line">
+                <span class="prompt">tgtg@monitor:~$</span> 
+                <span class="command">systemctl status tgtg-monitor</span>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <span>Monitor Service</span>
+                    <span class="badge">ACTIVE</span>
+                </div>
+                <div class="status-item">
+                    <span>Email Notifications</span>
+                    <span class="badge">ENABLED</span>
+                </div>
+                <div class="status-item">
+                    <span>Check Interval</span>
+                    <span class="highlight">15 minutes</span>
+                </div>
+                <div class="status-item">
+                    <span>Notification Type</span>
+                    <span class="highlight">NEW items only</span>
+                </div>
+                <div class="status-item">
+                    <span>Favorites Sync</span>
+                    <span class="badge">AUTO</span>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="step">
+            <h3>UNSUBSCRIBE SERVICE</h3>
+            <div class="line">
+                <span class="prompt">tgtg@monitor:~$</span> 
+                <span class="command">sudo systemctl stop tgtg-monitor</span> 
+                <span class="comment"># Remove all data</span>
+            </div>
+            
+            <form id="deregisterForm">
+                <input type="email" 
+                       id="deregister_email" 
+                       name="tgtg_email" 
+                       placeholder="your-tgtg-account@example.com"
+                       required>
+                <button type="submit" class="btn-danger">EXECUTE REMOVAL</button>
+            </form>
+            
+            <div id="deregisterMessage"></div>
+        </div>
+        
+        <div class="step">
+            <h3>PROCESS DOCUMENTATION</h3>
+            <div class="output">
+                <div class="line">
+                    <span class="success">1.</span> <span class="comment">Enter TooGoodToGo credentials → System validates account</span>
+                </div>
+                <div class="line">
+                    <span class="success">2.</span> <span class="comment">Background service monitors favorites every 15min</span>
+                </div>
+                <div class="line">
+                    <span class="success">3.</span> <span class="comment">Email sent only when NEW bags become available</span>
+                </div>
+                <div class="line">
+                    <span class="success">4.</span> <span class="comment">Each email includes ALL currently available favorites</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="line" style="margin-top: 40px;">
+            <span class="prompt">tgtg@monitor:~$</span> 
+            <span class="success">echo</span> <span class="highlight">"Happy food saving!"</span>
+        </div>
+        <div class="line">
+            <span class="comment"># Together we're fighting food waste, one surprise bag at a time</span>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
