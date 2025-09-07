@@ -6,12 +6,12 @@ function toggleTheme() {
     
     if (body.getAttribute('data-theme') === 'light') {
         body.removeAttribute('data-theme');
-        themeIcon.textContent = '🌙';
+        themeIcon.textContent = '☀️';
         themeText.textContent = 'LIGHT MODE';
         localStorage.setItem('theme', 'dark');
     } else {
         body.setAttribute('data-theme', 'light');
-        themeIcon.textContent = '☀️';
+        themeIcon.textContent = '🌙';
         themeText.textContent = 'DARK MODE';
         localStorage.setItem('theme', 'light');
     }
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (savedTheme === 'light') {
         document.body.setAttribute('data-theme', 'light');
-        themeIcon.textContent = '☀️';
+        themeIcon.textContent = '🌙';
         themeText.textContent = 'DARK MODE';
     }
 });

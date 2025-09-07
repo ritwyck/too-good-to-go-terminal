@@ -7,7 +7,6 @@ import re
 import time
 import threading
 from tgtg import TgtgClient
-
 from models import db, User
 from data_service import DatabaseService
 
@@ -20,14 +19,11 @@ def complete_auth_task(app, tgtg_email, data_service):
         try:
             client = TgtgClient(email=tgtg_email)
             print(f"🔐 Authentication started for {tgtg_email}")
-
             credentials = client.get_credentials()
             test_items = client.get_items()  # Test the connection
-
             # Create user with encrypted credentials
             user = data_service.create_user(tgtg_email, credentials)
             print(f"✅ User {tgtg_email} registered successfully!")
-
         except Exception as e:
             print(f"❌ Authentication failed for {tgtg_email}: {e}")
 
@@ -75,17 +71,14 @@ def create_app():
         if request.method == 'POST':
             email = request.form.get('email', '').strip()
             password = request.form.get('password', '').strip()
-
             if not email or not password:
                 return jsonify({"success": False, "message": "Email and password required"})
-
             user = data_service.get_user_by_email(email)
             if user and user.check_password(password):
                 login_user(user)
                 return redirect(url_for('dashboard'))
             else:
                 return jsonify({"success": False, "message": "Invalid credentials"})
-
         return render_template('login.html')
 
     @app.route('/dashboard')
@@ -93,20 +86,15 @@ def create_app():
     def dashboard():
         return render_template('dashboard.html', user=current_user)
 
-    # Then in your start_auth route:
-
     @app.route('/start_auth', methods=['POST'])
     def start_auth():
         tgtg_email = request.form.get('tgtg_email', '').strip()
-
         if not tgtg_email or not is_valid_email(tgtg_email):
             return jsonify({"success": False, "message": "Please enter a valid email address."})
-
         # Check if user already exists
         existing_user = data_service.get_user_by_email(tgtg_email)
         if existing_user:
             return jsonify({"success": False, "message": "This email is already registered!"})
-
         try:
             # Pass app explicitly to the thread
             from flask import current_app
@@ -116,12 +104,10 @@ def create_app():
                       tgtg_email, data_service),
                 daemon=True
             ).start()
-
             return jsonify({
                 "success": True,
                 "message": f"Please check your TooGoodToGo email ({tgtg_email}) on PC and click the verification link!"
             })
-
         except Exception as e:
             return jsonify({"success": False, "message": f"Error: {str(e)}"})
 
@@ -130,7 +116,6 @@ def create_app():
     def deregister():
         success = data_service.remove_user(current_user.email)
         logout_user()
-
         if success:
             return jsonify({"success": True, "message": "Successfully removed from notifications."})
         else:
