@@ -126,3 +126,95 @@ document.getElementById('deregisterForm').onsubmit = function(e) {
         });
     }
 };
+// Handle unsubscribe form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const deregisterForm = document.getElementById('deregisterForm');
+    const deregisterMessage = document.getElementById('deregisterMessage');
+    
+    if (deregisterForm) {
+        deregisterForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            const emailInput = document.getElementById('deregister_email');
+            const email = emailInput.value.trim();
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            if (!email) {
+                showMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            // Disable button and show loading
+            submitButton.disabled = true;
+            submitButton.textContent = 'REMOVING...';
+            showMessage('Processing removal request...', 'info');
+            
+            try {
+                const response = await fetch('/unsubscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        email: email
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    deregisterForm.reset(); // Clear the form
+                } else {
+                    showMessage(result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = 'EXECUTE REMOVAL';
+            }
+        });
+    }
+    
+    function showMessage(message, type) {
+        deregisterMessage.innerHTML = '';
+        
+        const line = document.createElement('div');
+        line.className = 'line';
+        
+        let icon = '';
+        let className = '';
+        
+        switch(type) {
+            case 'success':
+                icon = '✓';
+                className = 'success';
+                break;
+            case 'error':
+                icon = '✗';
+                className = 'error';
+                break;
+            case 'info':
+                icon = 'ℹ';
+                className = 'warning';
+                break;
+            default:
+                icon = '•';
+                className = 'comment';
+        }
+        
+        line.innerHTML = `<span class="${className}">[${icon}]</span> <span class="comment">SYSTEM_${type.toUpperCase()}: ${message}</span>`;
+        deregisterMessage.appendChild(line);
+        
+        // Auto-hide success messages after 5 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                deregisterMessage.innerHTML = '';
+            }, 5000);
+        }
+    }
+});

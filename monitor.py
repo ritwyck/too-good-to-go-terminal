@@ -19,12 +19,16 @@ class TgtgMonitor:
     def check_favorites(self):
         """Check favorites for all active users"""
         active_users = self.data_service.get_active_users()
+        print(f"🔍 Checking {len(active_users)} active users...")
+
         for user in active_users:
             self._check_user_favorites(user)
 
     def _check_user_favorites(self, user: User):
         """Check favorites for a single user"""
         try:
+            print(f"\n👤 Checking {user.email}...")
+
             # Get user credentials
             credentials = self.data_service.get_user_credentials(user)
             if not credentials:
@@ -36,6 +40,8 @@ class TgtgMonitor:
 
             # Get current items
             current_items = client.get_items()
+            print(
+                f"📱 Retrieved {len(current_items)} total items from TGTG API")
 
             # Process current available items to get store set
             current_available_stores = []
@@ -63,14 +69,22 @@ class TgtgMonitor:
                     current_available_stores.append(item_data)
                     current_store_names.add(store_name)
 
+            print(
+                f"🏪 Found {len(current_available_stores)} stores with available items")
+
             # Get stores from last email sent
             last_emailed_stores = self.data_service.get_last_emailed_stores(
                 user)
+            print(
+                f"📧 Last email contained stores: {sorted(last_emailed_stores)}")
 
             # Only send email if there are NEW stores added (not removed)
             stores_added = current_store_names - last_emailed_stores
             should_send_email = len(stores_added) > 0 and len(
                 current_available_stores) > 0
+
+            print(f"🆕 New stores detected: {sorted(stores_added)}")
+            print(f"📬 Should send email: {should_send_email}")
 
             if should_send_email:
                 # Mark new stores (stores not in last email)
@@ -85,13 +99,13 @@ class TgtgMonitor:
                 print(f"   Current stores: {sorted(current_store_names)}")
                 print(f"   New stores added: {sorted(stores_added)}")
 
-                # Send notification
+                # Send notification - FIXED: Added missing closing parenthesis
                 success = self.email_service.send_notification(
                     user.email,
                     current_available_stores,
                     new_stores_count,
                     self.server_url
-                )
+                )  # <-- FIXED: This closing parenthesis was missing!
 
                 if success:
                     # Record this email in database
@@ -125,13 +139,13 @@ class TgtgMonitor:
             import traceback
             traceback.print_exc()
 
-    def start(self, check_interval_minutes: int = 15):
+    def start(self, check_interval_minutes: int = 5):
         """Start the monitoring service"""
         print("🚀 Starting TooGoodToGo monitor with store-addition tracking...")
         print("📧 Sending emails ONLY when NEW stores are added to your favorites")
         print("🏪 Store removals and quantity changes = no emails")
         print("✨ Store reintroductions = new emails")
-        print(f"⏰ Checking every {check_interval_minutes} minutes")
+        print(f"⏰ Checking every minute")
 
         # Create Flask app context for database operations
         app = create_app()

@@ -24,10 +24,8 @@ class DatabaseService:
         return user
 
     def get_active_users(self) -> List[User]:
-        """Get all users with monitoring enabled and credentials"""
-        return User.query.filter_by(monitoring_enabled=True)\
-            .join(UserCredentials)\
-            .all()
+        """Get all users with stored credentials (all users are considered active)"""
+        return User.query.join(UserCredentials).all()
 
     def get_user_credentials(self, user: User) -> dict:
         """Get decrypted TooGoodToGo credentials for user"""
@@ -73,7 +71,7 @@ class DatabaseService:
         db.session.commit()
 
     def remove_user(self, email: str) -> bool:
-        """Remove user and all associated data"""
+        """Remove user and all associated data (complete unsubscribe)"""
         user = self.get_user_by_email(email)
         if user:
             # Cascade will delete credentials and notifications
@@ -82,12 +80,11 @@ class DatabaseService:
             return True
         return False
 
+    # Remove these deprecated methods
     def disable_monitoring(self, user: User):
-        """Disable monitoring for user"""
-        user.monitoring_enabled = False
-        db.session.commit()
+        """Deprecated - users are either active or deleted"""
+        pass
 
     def enable_monitoring(self, user: User):
-        """Enable monitoring for user"""
-        user.monitoring_enabled = True
-        db.session.commit()
+        """Deprecated - users are either active or deleted"""
+        pass

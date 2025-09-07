@@ -121,15 +121,47 @@ def create_app():
         else:
             return jsonify({"success": False, "message": "Error removing account."})
 
-    @app.route('/unsubscribe')
-    def unsubscribe_page():
-        email = request.args.get('email', '')
-        if email:
+    @app.route('/unsubscribe', methods=['GET', 'POST'])
+    def unsubscribe():
+        if request.method == 'GET':
+            # Handle email unsubscribe links from emails
+            email = request.args.get('email', '')
+            if email:
+                user = data_service.get_user_by_email(email)
+                if user:
+                    success = data_service.remove_user(email)
+                    if success:
+                        return redirect(url_for('index'))
+            return redirect(url_for('index'))
+
+        elif request.method == 'POST':
+            # Handle form submission with JSON response
+            email = request.form.get('email', '').strip()
+
+            if not email:
+                return jsonify({
+                    'success': False,
+                    'message': 'Email address is required'
+                }), 400
+
             user = data_service.get_user_by_email(email)
             if user:
-                data_service.disable_monitoring(user)
-                return render_template('unsubscribe_success.html', email=email)
-        return render_template('unsubscribe.html')
+                success = data_service.remove_user(email)
+                if success:
+                    return jsonify({
+                        'success': True,
+                        'message': f'Successfully removed {email} from notifications'
+                    }), 200
+                else:
+                    return jsonify({
+                        'success': False,
+                        'message': 'Error removing your data. Please try again.'
+                    }), 500
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Email address not found in our system'
+                }), 404
 
     @app.route('/logout')
     @login_required
