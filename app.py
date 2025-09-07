@@ -15,14 +15,34 @@ from data_service import DatabaseService
 load_dotenv()
 
 
+def complete_auth_task(app, tgtg_email, data_service):
+    with app.app_context():  # ✅ Explicit app reference
+        try:
+            client = TgtgClient(email=tgtg_email)
+            print(f"🔐 Authentication started for {tgtg_email}")
+
+            credentials = client.get_credentials()
+            test_items = client.get_items()  # Test the connection
+
+            # Create user with encrypted credentials
+            user = data_service.create_user(tgtg_email, credentials)
+            print(f"✅ User {tgtg_email} registered successfully!")
+
+        except Exception as e:
+            print(f"❌ Authentication failed for {tgtg_email}: {e}")
+
+
 def create_app():
     app = Flask(__name__)
 
-    # Configuration
+    # Load environment variables first
+    load_dotenv()
+
+    # Essential Flask configuration
     app.config['SECRET_KEY'] = os.getenv(
-        'SECRET_KEY', 'dev-secret-key-change-in-production')
+        'SECRET_KEY', 'dev-key-change-in-production')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL', 'sqlite:///tgtg_monitor.db')
+        'DATABASE_URL', 'sqlite:///instance/tgtg_monitor.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
@@ -73,6 +93,8 @@ def create_app():
     def dashboard():
         return render_template('dashboard.html', user=current_user)
 
+    # Then in your start_auth route:
+
     @app.route('/start_auth', methods=['POST'])
     def start_auth():
         tgtg_email = request.form.get('tgtg_email', '').strip()
@@ -86,22 +108,14 @@ def create_app():
             return jsonify({"success": False, "message": "This email is already registered!"})
 
         try:
-            def complete_auth():
-                try:
-                    client = TgtgClient(email=tgtg_email)
-                    print(f"🔐 Authentication started for {tgtg_email}")
-
-                    credentials = client.get_credentials()
-                    test_items = client.get_items()  # Test the connection
-
-                    # Create user with encrypted credentials
-                    user = data_service.create_user(tgtg_email, credentials)
-                    print(f"✅ User {tgtg_email} registered successfully!")
-
-                except Exception as e:
-                    print(f"❌ Authentication failed for {tgtg_email}: {e}")
-
-            threading.Thread(target=complete_auth, daemon=True).start()
+            # Pass app explicitly to the thread
+            from flask import current_app
+            threading.Thread(
+                target=complete_auth_task,
+                args=(current_app._get_current_object(),
+                      tgtg_email, data_service),
+                daemon=True
+            ).start()
 
             return jsonify({
                 "success": True,
@@ -147,4 +161,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(host='127.0.0.1', port=5001, debug=True)

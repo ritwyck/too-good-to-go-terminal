@@ -6,11 +6,12 @@ from email_service import EmailService
 from data_service import DatabaseService
 from tgtg_service import TgtgService
 from app import create_app
+import os
 
 
 class TgtgMonitor:
     def __init__(self, server_url: str = "http://localhost:5000"):
-        self.email_service = EmailService()
+        self.email_service = EmailService(os.getenv('SENDINBLUE_API_KEY'))
         self.data_service = DatabaseService()
         self.tgtg_service = TgtgService()
         self.server_url = server_url
@@ -61,22 +62,16 @@ class TgtgMonitor:
                         )
                         print(
                             f"🆕 NEW: {item['available']} bags at '{item['store']}' - {item['item']}")
-            else:
-                if all_available:
-                    print(
-                        f"📋 {len(all_available)} bags available but no new items for {user.email}")
-                else:
-                    print(f"📭 No bags available for {user.email}")
 
         except Exception as e:
             print(f"❌ Error checking favorites for {user.email}: {e}")
 
-    def start(self, check_interval_minutes: int = 15):
+    def start(self, check_interval_minutes: int = 1):
         """Start the monitoring service"""
         print("🚀 Starting TooGoodToGo monitor with database backend...")
         print("🆕 Sending notifications only when NEW items become available")
         print("📧 Beautiful terminal-themed emails with unsubscribe functionality")
-        print(f"⏰ Checking every {check_interval_minutes} minutes")
+        print(f"⏰ Checking every minute")
 
         # Create Flask app context for database operations
         app = create_app()
